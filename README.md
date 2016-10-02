@@ -1,17 +1,17 @@
-# Curated (re)analysis of RNA-seq data from Jaffe _et al._ (2014)
+# Curated (re)analysis of Neural RNA-seq data
 
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
-> Materials from a fully reproducible, curated re-analysis of public RNA-seq
-> data on human cortex development
+> Materials from a fully reproducible, curated (re)analysis of public RNA-seq
+> data from a study examining the development of the human cortex.
 
 ---
 
 ## Summary
 
 This is a fully curated, computationally reproducible, statistical re-analysis
-of the data set collected for and originally analyzed in the Jaffe _et al._
-paper cited below.
+of the RNA-Seq data set collected for and originally analyzed in the Jaffe _et
+al._ paper cited below.
 
 ---
 
@@ -36,9 +36,21 @@ paper cited below.
 
 ---
 
+## Requirements
+
+* `fastq-dump` - utility for converting SRA data to the FASTQ format
+
+* `python3` - a working installation of Python v3.5+ as a glue language
+
+* `kallisto` - probabilistic pseudo-aligner for quantifying RNA-seq reads
+
+* `R` - a working installation of R v3.3+ is used for statistical analyses
+
+---
+
 ## Notes
 
-These are the materials as part of  my participation in the [Genomic Data
+This work was produced as part of  my participation in the [Genomic Data
 Science Capstone](https://www.coursera.org/learn/genomic-data-science-project),
 a part of the [_Genomic Big Data Science
 Specialization_](https://www.coursera.org/specializations/genomic-data-science)

@@ -1,18 +1,20 @@
-.PHONY : dataset preprocess analysis report
-PROJ = neurodevstat
+.PHONY : all
 
 dataset :
-  python3 preprocessing/01_dumpData.py
+	python3 preprocessing/01_dumpData.py
 
 preprocess :
-  sh preprocessing/02_data.sh
-  python3 preprocessing/03_fasta.py
+	sh preprocessing/02_bowtieAlign.sh
+	sh preprocessing/03_makeCounts.sh
+	sh preprocessing/04_wrapScripts.sh
 
 analysis :
-  R CMD BATCH ./src/01_rna.R
-  R CMD BATCH ./src/02_vis.R
+	ssh nhejazi@bluevelvet.biostat.berkeley.edu \
+		'cd ~/$(PROJ); R CMD BATCH ./src/01_sgRNAlimma.R'
+	ssh nhejazi@bluevelvet.biostat.berkeley.edu \
+		'cd ~/$(PROJ); R CMD BATCH ./src/02_visLimma.R'
 
 report :
-  Rscript -3 "library(knitr); Rmarkdown::render('./reports/analysis.Rmd')"
+	Rscript -e "library(knitr); Rmarkdown::render('reports/analysis.Rmd')"
 
 all : dataset preprocess analysis report

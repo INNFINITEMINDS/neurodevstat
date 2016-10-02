@@ -22,11 +22,13 @@ def dump_data(codebook, outdir):
     ids = pd.concat([ids.run_ID_1, ids.run_ID_2], 0)
 
     for id in ids.ravel():
-        fetch_data = ('prefetch -v' + ' ' + id)
-        data_dump = ('fastq-dump --outdir ' + os.path.abspath(os.getcwd() +
-                     str(outdir)) + ' ' + '--split-files' + ' ' +
-                     '~/ncbi/public/sra/' + id + '.rsa')
+        fetch_data = ('prefetch' + ' ' + id)
         subprocess.call(fetch_data, shell = True)
+
+    for id in ids.ravel():
+        data_dump = ('fastq-dump --outdir ' + os.path.abspath(os.getcwd() +
+                     '/' + str(outdir)) + ' ' + '--gzip' + ' ' +
+                     '~/ncbi/public/sra/' + id + '.rsa')
         subprocess.call(data_dump, shell = True)
 
 if __name__ == '__main__':
