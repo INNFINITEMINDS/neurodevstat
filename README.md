@@ -1,16 +1,16 @@
-# Curated (re)analysis of Neural RNA-seq data
+# Curated (re)analysis of nervous system RNA-seq data
 
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
-> Materials from a fully reproducible, curated (re)analysis of public RNA-seq
-> data from a study examining the development of the human cortex.
+> Materials from a fully reproducible, curated (re)analysis of public data from
+> an RNA-seq study examining developmental changes of the human cortex.
 
 ---
 
 ## Summary
 
 This is a fully curated, computationally reproducible, statistical re-analysis
-of the RNA-Seq data set collected for and originally analyzed in the Jaffe _et
+of the RNA-seq data set collected for and originally analyzed in the Jaffe _et
 al._ paper cited below.
 
 ---
@@ -27,7 +27,8 @@ al._ paper cited below.
 
 3. [C.W. Law, Y. Chen, W. Shi, and G.K. Smyth. "voom: precision weights unlock
     linear model analysis tools for RNA-seq read counts." _Genome Biology_,
-    15(2), 2014.](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)
+    15(2),
+    2014.](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)
 
 4. [G.K. Smyth. "Linear models and empirical Bayes methods for assessing
     differential expression in microarray experiments." _Statistical
@@ -38,13 +39,18 @@ al._ paper cited below.
 
 ## Requirements
 
-* `fastq-dump` - utility for converting SRA data to the FASTQ format
+* [`sra-tools`](https://github.com/ncbi/sra-tools) - utilities for downloading
+    and converting SRA data to FASTQ format
 
-* `python3` - a working installation of Python v3.5+ as a glue language
+* `python` - [Python v3.5+](https://www.python.org/downloads/) is used here as a
+    "superglue" language
 
-* `kallisto` - probabilistic pseudo-aligner for quantifying RNA-seq reads
+* [`kallisto`](https://pachterlab.github.io/kallisto/) - probabilistic
+    pseudo-aligner used for quantification of RNA-seq reads
 
-* `R` - a working installation of R v3.3+ is used for statistical analyses
+* `R` - [R v3.3+](https://www.r-project.org), alongside several packages from
+    the [Bioconductor project](http://www.bioconductor.org), are used for
+    statistical analysis
 
 ---
 

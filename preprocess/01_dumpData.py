@@ -12,7 +12,6 @@ def dump_data(codebook, outdir):
     """
 
     import os
-    import getpass
     import subprocess
     import pandas as pd
 
