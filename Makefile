@@ -1,12 +1,15 @@
 .PHONY : all
 
 dataset :
-	python3 preprocessing/01_dumpData.py
+	python preprocessing/01_dumpData.py
 
-preprocess :
-	sh preprocessing/02_bowtieAlign.sh
-	sh preprocessing/03_makeCounts.sh
-	sh preprocessing/04_wrapScripts.sh
+reference :
+	sh preprocess/02_refGenome.sh
+
+preprocessing :
+	sh preprocess/02_bowtieAlign.sh
+	sh preprocess/03_makeCounts.sh
+	sh preprocess/04_wrapScripts.sh
 
 analysis :
 	ssh nhejazi@bluevelvet.biostat.berkeley.edu \
@@ -17,4 +20,4 @@ analysis :
 report :
 	Rscript -e "library(knitr); Rmarkdown::render('reports/analysis.Rmd')"
 
-all : dataset preprocess analysis report
+all : dataset reference preprocessing analysis report

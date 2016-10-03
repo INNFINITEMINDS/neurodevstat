@@ -9,7 +9,7 @@
 
 * `01_dumpData.py` - description here
 
-* `02_genomeRef.sh` - description here
+* `02_refGenome.sh` - description here
 
 * `03_getFastq.sh` - description here
 

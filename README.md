@@ -15,6 +15,12 @@ al._ paper cited below.
 
 ---
 
+## Description
+
+This project constitutes...
+
+---
+
 ## References
 
 1. [A.E. Jaffe _et al._. "Developmental regulation of human cortex transcription
@@ -40,17 +46,17 @@ al._ paper cited below.
 ## Requirements
 
 * [`sra-tools`](https://github.com/ncbi/sra-tools) - utilities for downloading
-    and converting SRA data to FASTQ format
+    and converting SRA data to FASTQ format.
 
-* `python` - [Python v3.5+](https://www.python.org/downloads/) is used here as a
-    "superglue" language
+* `python` - [Python v3.5+](https://www.python.org/downloads/) is used to build
+    build wrapper scripts for easily using necessary command line tools.
 
 * [`kallisto`](https://pachterlab.github.io/kallisto/) - probabilistic
-    pseudo-aligner used for quantification of RNA-seq reads
+    pseudo-aligner used for quantification of the paired-end RNA-seq reads.
 
 * `R` - [R v3.3+](https://www.r-project.org), alongside several packages from
     the [Bioconductor project](http://www.bioconductor.org), are used for
-    statistical analysis
+    statistical analysis.
 
 ---
 

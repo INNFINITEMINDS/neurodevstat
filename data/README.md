@@ -27,8 +27,8 @@
     is recommended that other resources be used to acquire the reads in `fastq`
     format; in particular, consider consulting these resources:
     * [__Japan SRA mirror__](http://trace.ddbj.nig.ac.jp/dra/index_e.html) - has
-        not completely adopted the `sra` format, with many data files still
-        being available in `fastq` format.
+        not fully adopted the `sra` format, with many data files still
+        being available as `fastq`.
     * [__European Nucleotide Archive__](http://www.ebi.ac.uk/ena) - provides a
         large collection of data sets in `fastq` format.
     * [Biostars thread on `fastq-dump` speed
