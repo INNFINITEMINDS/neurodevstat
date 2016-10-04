@@ -1,23 +1,23 @@
 .PHONY : all
 
-dataset :
-	python preprocessing/01_dumpData.py
+dataSRA :
+	python preprocess/01_dumpData.py
+
+dataFQ :
+	sh preprocess/02_getDataFQ.py
 
 reference :
-	sh preprocess/02_refGenome.sh
+	sh preprocess/03_refGenome.sh
 
-preprocessing :
-	sh preprocess/02_bowtieAlign.sh
-	sh preprocess/03_makeCounts.sh
-	sh preprocess/04_wrapScripts.sh
+pseudoalign :
+	sh preprocess/04_pseudoAlign.sh
 
 analysis :
-	ssh nhejazi@bluevelvet.biostat.berkeley.edu \
-		'cd ~/$(PROJ); R CMD BATCH ./src/01_sgRNAlimma.R'
-	ssh nhejazi@bluevelvet.biostat.berkeley.edu \
-		'cd ~/$(PROJ); R CMD BATCH ./src/02_visLimma.R'
+	R CMD BATCH src/01_setAnalysis.R
+	R CMD BATCH src/02_fitAnalysis.R
+	R CMD BATCH src/03_visAnalysis.R
 
 report :
 	Rscript -e "library(knitr); Rmarkdown::render('reports/analysis.Rmd')"
 
-all : dataset reference preprocessing analysis report
+all : dataFQ reference pseudoalign analysis report

@@ -1,1 +1,0 @@
-kallisto index -i

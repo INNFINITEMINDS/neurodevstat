@@ -46,13 +46,13 @@ This project constitutes...
 ## Requirements
 
 * [`sra-tools`](https://github.com/ncbi/sra-tools) - utilities for downloading
-    and converting SRA data to FASTQ format.
+    data in SRA format and converting to FASTQ format.
 
-* `python` - [Python v3.5+](https://www.python.org/downloads/) is used to build
+* `Python` - [Python v3.5+](https://www.python.org/downloads/) is used to build
     build wrapper scripts for easily using necessary command line tools.
 
 * [`kallisto`](https://pachterlab.github.io/kallisto/) - probabilistic
-    pseudo-aligner used for quantification of the paired-end RNA-seq reads.
+    pseudo-alignment algorithm/tool used for quantification of RNA-seq reads.
 
 * `R` - [R v3.3+](https://www.r-project.org), alongside several packages from
     the [Bioconductor project](http://www.bioconductor.org), are used for
