@@ -49,14 +49,14 @@ This project constitutes...
     data in SRA format and converting to FASTQ format.
 
 * `Python` - [Python v3.5+](https://www.python.org/downloads/) is used to build
-    build wrapper scripts for easily using necessary command line tools.
+    wrapper scripts for invoking several command line tools.
 
 * [`kallisto`](https://pachterlab.github.io/kallisto/) - probabilistic
-    pseudo-alignment algorithm/tool used for quantification of RNA-seq reads.
+    pseudo-alignment tool used for quantification of paired-end RNA-seq reads.
 
 * `R` - [R v3.3+](https://www.r-project.org), alongside several packages from
-    the [Bioconductor project](http://www.bioconductor.org), are used for
-    statistical analysis.
+    the [Bioconductor project](http://www.bioconductor.org), is used for
+    statistical analyses.
 
 ---
 

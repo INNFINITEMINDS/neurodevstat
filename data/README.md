@@ -7,8 +7,9 @@
 
 ## Notes
 
-* Scripts in this directory can be used to download the appropriate data files
-    from the NCBI database in `sra` format.
+* Scripts in this directory can be used to download data files from the [NCBI
+    Short Read Archive database](https://www.ncbi.nlm.nih.gov/sra) in `sra`
+    format.
 
 * The `sra` files must then be converted via
     ([fastq-dump](https://www.ncbi.nlm.nih.gov/books/NBK158900/)) to `fastq`

@@ -6,7 +6,4 @@ data/*.fq
 data/*.fa
 data/*.fastq
 data/*.fasta
-preprocess/*.fa
-preprocess/*.fq
-preprocess/*.fasta
-preprocess/*.fastq
+data/*.idx
