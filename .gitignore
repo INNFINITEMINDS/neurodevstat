@@ -7,3 +7,11 @@ data/*.fa
 data/*.fastq
 data/*.fasta
 data/*.idx
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.out
+*.xml
+*.gz
