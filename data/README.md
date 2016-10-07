@@ -1,15 +1,14 @@
 # data
 
-> The publicly available data from the _Jaffe et al._ study, used in this
-> re-analysis study
+> Data from the Jaffe _et al._ study, and data files produced in preprocessing,
+> are found here
 
 ---
 
 ## Notes
 
-* Scripts in this directory can be used to download data files from the [NCBI
-    Short Read Archive database](https://www.ncbi.nlm.nih.gov/sra) in `sra`
-    format.
+* The publicly available data files are housed at the [NCBI Short Read Archive
+    database](https://www.ncbi.nlm.nih.gov/sra) in `sra` format.
 
 * The `sra` files must then be converted via
     ([fastq-dump](https://www.ncbi.nlm.nih.gov/books/NBK158900/)) to `fastq`

@@ -1,1 +1,5 @@
-Here you can store any test cases for the functions you've written. Your test files should use `testthat` style tests so that you can call the `test.project()` function to automatically execute all of your test code.
+# tests
+
+Tests for the functions defined in the helper scripts located in the `lib`
+subdirectory. Test files use the `testthat` style (so that they can easily and
+automatically be called by `test.project()` function).

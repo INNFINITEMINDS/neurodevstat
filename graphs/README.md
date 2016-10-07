@@ -1,1 +1,3 @@
-Here you can store any graphs that you produce.
+# graphs
+
+> visualizations and graphics produced over the course of statistical analysis

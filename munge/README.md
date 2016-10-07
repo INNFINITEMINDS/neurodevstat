@@ -1,1 +1,9 @@
-Here you can store any preprocessing or data munging code for your project. For example, if you need to add columns at runtime, merge normalized data sets or globally censor any data points, that code should be stored in the `munge` directory. The preprocessing scripts stored in `munge` will be executed sequentially when you call `load.project()`, so you should append numbers to the filenames to indicate their sequential order.
+# munge
+
+> statistical preprocessing of cleaned RNA-seq read count data
+
+All scripts here are intended to performed statistical preprocessing on the
+tables of read counts produced by the bioinformatical preprocessing scripts
+(housed in the `preprocess` subdirectory). Scripts here do not need to be called
+directly, as a simple call to `load.project()` (by scripts in the `src`
+directory) will automatically run these preprocessing scripts.

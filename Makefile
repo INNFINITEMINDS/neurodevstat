@@ -8,7 +8,7 @@ dataFQ :
 
 pseudoalign :
 	sh preprocess/03_refGenome.sh
-	sh preprocess/04_pseudoAlign.py
+	python3 preprocess/04_pseudoAlign.py
 
 analysis :
 	R CMD BATCH src/01_setAnalysis.R
@@ -18,4 +18,4 @@ analysis :
 report :
 	Rscript -e "library(knitr); Rmarkdown::render('reports/analysis.Rmd')"
 
-all : dataFQ pseudoalign analysis report
+all : pseudoalign analysis report
