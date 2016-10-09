@@ -107,10 +107,17 @@ through the use of the \textbf{kallisto} command line tool. Using a publicly
 available trascriptome assembled from the GRCh38 (hg19) \textit{Homo sapiens}
 genome, sets of paired-end RNA-Seq reads for each of the 12 subjects involved in
 the study were pseudo-aligned, resulting in count tables mapping each set of
-reads to \textbf{173,259} transcriptomic objects. Tables of counts are produced
-for each set of paired-end RNA-Seq reads for each subject in a tab-separated
-file format; these files are suitable for concatenation into a count table for
-all subjects, which can be subjected to statistical analysis after appropriate
-data cleaning.
+reads to \textbf{173,259} transcriptomic objects. \textit{Please note that while
+similar quantification tools (e.g., Cufflinks) produce estimates of mappings of
+isoforms, kallisto provides estimates of transcript abundance}. Though this is
+the first time that I have used \textbf{kallisto} for alignment and RNA-Seq
+quantification, elementary searches for the ``run\textunderscore info.json''
+output file (from other unrelated projects) seem to suggest that the produced
+transcript abundances are normal for \textbf{kallisto}. Tables of counts are
+produced for each set of paired-end RNA-Seq reads for each subject in a
+tab-separated file format; these files are suitable for concatenation into a
+single count table containing quantification results for all subjects, which can
+be used as input to a set of statistical analysis scripts after appropriate data
+cleaning.
 
 \end{document}
