@@ -5,143 +5,114 @@
 %%% Date: February 2011
 
 %%% Preamble
-\documentclass[paper=a4, fontsize=11pt]{scrartcl}	% Article class of KOMA-script with 11pt font and a4 format
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % Article class of KOMA-script with 11pt font and a4 format
 
-\usepackage[english]{babel}															% English language/hyphenation
-\usepackage[protrusion=true,expansion=true]{microtype}				% Better typography
-\usepackage{amsmath,amsfonts,amsthm}										% Math packages
-\usepackage[pdftex]{graphicx}														% Enable pdflatex
-%\usepackage{color,transparent}													% If you use color and/or transparency
-\usepackage[hang, small,labelfont=bf,up,textfont=it,up]{caption}	% Custom captions under/above floats
-\usepackage{epstopdf}																	% Converts .eps to .pdf
-\usepackage{subfig}																		% Subfigures
-\usepackage{booktabs}																	% Nicer tables
-
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage[protrusion=true,expansion=true]{microtype} % Better typography
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage[pdftex]{graphicx} % Enable pdflatex
+%\usepackage{color,transparent} % If you use color and/or transparency
+\usepackage[hang, small,labelfont=bf,up,textfont=it,up]{caption} % Custom captions under/above floats
+\usepackage{epstopdf} % Converts .eps to .pdf
+\usepackage{subfig} % Subfigures
+\usepackage{booktabs} % Nicer tables
+\usepackage{hyperref}
 
 %%% Advanced verbatim environment
 \usepackage{verbatim}
 \usepackage{fancyvrb}
-\DefineShortVerb{\|}								% delimiter to display inline verbatim text
+\DefineShortVerb{\|} % delimiter to display inline verbatim text
 
 
 %%% Custom sectioning (sectsty package)
-\usepackage{sectsty}								% Custom sectioning (see below)
-\allsectionsfont{%									% Change font of al section commands
-	\usefont{OT1}{bch}{b}{n}%					% bch-b-n: CharterBT-Bold font
-%	\hspace{15pt}%									% Uncomment for indentation
-	}
+\usepackage{sectsty} % Custom sectioning (see below)
+\allsectionsfont{ % Change font of al section commands
+  \usefont{OT1}{bch}{b}{n} % bch-b-n: CharterBT-Bold font
+% \hspace{15pt} % Uncomment for indentation
+}
 
-\sectionfont{%										% Change font of \section command
-	\usefont{OT1}{bch}{b}{n}%					% bch-b-n: CharterBT-Bold font
-	\sectionrule{0pt}{0pt}{-5pt}{0.8pt}%	% Horizontal rule below section
-	}
+\sectionfont{ % Change font of \section command
+ \usefont{OT1}{bch}{b}{n} % bch-b-n: CharterBT-Bold font
+ \sectionrule{0pt}{0pt}{-5pt}{0.8pt} % Horizontal rule below section
+}
 
 
 %%% Custom headers/footers (fancyhdr package)
 \usepackage{fancyhdr}
 \pagestyle{fancyplain}
-\fancyhead{}														% No page header
-\fancyfoot[C]{\thepage}										% Pagenumbering at center of footer
-\fancyfoot[R]{\small \texttt{HowToTeX.com}}	% You can remove/edit this line 
-\renewcommand{\headrulewidth}{0pt}				% Remove header underlines
-\renewcommand{\footrulewidth}{0pt}				% Remove footer underlines
-\setlength{\headheight}{13.6pt}
+\fancyhead{} % No page header
+%\fancyfoot[C]{\thepage} % Pagenumbering at center of footer
+%\fancyfoot[R]{\small \texttt{}} % You can remove/edit this line 
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{12.0pt}
 
 %%% Equation and float numbering
-\numberwithin{equation}{section}															% Equationnumbering: section.eq#
-\numberwithin{figure}{section}																% Figurenumbering: section.fig#
-\numberwithin{table}{section}																% Tablenumbering: section.tab#
+%\numberwithin{equation}{section}
+% Equationnumbering: section.eq#
+%\numberwithin{figure}{section}
+% Figurenumbering: section.fig#
+%\numberwithin{table}{section}
+% Tablenumbering: section.tab#
 
 
-%%% Title	
-\title{ \vspace{-1in} 	\usefont{OT1}{bch}{b}{n}
-		\huge \strut This is the title of the template report \strut \\
-		\Large \bfseries \strut and a subtitle \strut
+%%% Title
+\title{ \vspace{-1in} \usefont{OT1}{bch}{b}{n}
+\huge \strut Pseudo-Alignment with
+{\href{https://pachterlab.github.io/kallisto/about}{kallisto}} \strut \\
+\Large \bfseries \strut Efficient Probabilistic Quantification of RNA-Seq Reads
+  \strut
 }
-\author{ 									\usefont{OT1}{bch}{m}{n}
-        Firstname Lastname\\		\usefont{OT1}{bch}{m}{n}
-        University of Examples\\	\usefont{OT1}{bch}{m}{n}
-        Random Department\\
-        \texttt{email@example.com}
+\author{ \usefont{OT1}{bch}{m}{n}
+        Nima Hejazi\\ \usefont{OT1}{bch}{m}{n}
+        Division of Biostatistics\\
+        University of California, Berkeley\\ \usefont{OT1}{bch}{m}{n}
+        \texttt{nh@nimahejazi.org}
 }
 \date{}
 
 %%% Begin document
 \begin{document}
 \maketitle
-\section{Heading on level 1 (section)}
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies 
+\section{Pseudo-Alignment of RNA-Seq Reads}
+The present project concerns the re-analysis of transcriptomic data from the
+study described in the paper
+{\href{http://www.nature.com/neuro/journal/v18/n1/abs/nn.3898.html}{``Developmental
+regulation of human cortex transcription and its clinical relevance at base
+resolution''}}, Jaffe \textit{et al.}, \textit{Nature Neuroscience}. In order to
+quantify RNA-Seq reads, alignment against a reference transcriptome must be
+performed, a procedure which results in tables of read counts for use in
+downstream statistical analysis. Here, we take advantage of
+\textbf{pseudo-alignment}, a novel development in sequencing algorithms, to
+probabilistically align reads. Below, we describe pseudo-alignment and the
+results of its application to the Jaffe \textit{et al.} data.
 
-\subsection{Heading on level 2 (subsection)}
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. 
+\subsection{The Pseudo-Alignment Process}
+Pseudo-alignment is a novel process for quantifying a set of samples of RNA-Seq
+reads by performing partial matching against a reference transcriptome. The
+novel pseudo-alignment process, implemented in the command line tool
+\textbf{kallisto}, takes into account all of the information contained in a set
+of reads while reducing the computational burden imposed by more traditional
+alignment techniques. The \textbf{kallisto} tool provides results similar to
+that produced by other alignment software (\textit{e.g.}, \textbf{bowtie}),
+while taking only a fraction of the time. For a complete description of
+pseudo-alignment, consult the paper
+{\href{http://www.nature.com/nbt/journal/v34/n5/full/nbt.3519.html}{``Near-optimal
+probabilistic RNA-seq quantification''}}, Bray \textit{et al.}, \textit{Nature
+Biotechnology}.
 
-\subsubsection{Heading on level 3 (subsubsection)}
-Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim.
-
-\paragraph{Heading on level 4 (paragraph)}
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. 
-
-
-\section{Lists}
-\subsection{Example for list (itemize)}
-\begin{itemize}
-	\item First item in a list 
-	\item Second item in a list 
-	\item Third item in a list
-\end{itemize}
-
-\subsubsection{Example for list (3*itemize)}
-\begin{itemize}
-	\item First item in a list 
-		\begin{itemize}
-		\item First item in a list 
-			\begin{itemize}
-			\item First item in a list 
-			\item Second item in a list 
-			\end{itemize}
-		\item Second item in a list 
-		\end{itemize}
-	\item Second item in a list 
-\end{itemize}
-
-\subsection{Example for list (enumerate)}
-\begin{enumerate}
-	\item First item in a list 
-	\item Second item in a list 
-	\item Third item in a list
-\end{enumerate}
-
-\subsubsection{Example for list (3*enumerate)}
-\begin{enumerate}
-	\item First item in a list 
-		\begin{enumerate}
-		\item First item in a list 
-			\begin{enumerate}
-			\item First item in a list 
-			\item Second item in a list 
-			\end{enumerate}
-		\item Second item in a list 
-		\end{enumerate}
-	\item Second item in a list 
-\end{enumerate}
-
-\section{Mathematics}
-Let's display some math:
-\begin{align} 
-	\begin{split}
-	(x+y)^3 	&= (x+y)^2(x+y)\\
-					&=(x^2+2xy+y^2)(x+y)\\
-					&=(x^3+2x^2y+xy^2) + (x^2y+2xy^2+y^3)\\
-					&=x^3+3x^2y+3xy^2+y^3
-	\end{split}					
-\end{align}
-
-\begin{align}
-	A = 
-	\begin{bmatrix}
-	A_{11} & A_{21} \\
-  	A_{21} & A_{22}
-	\end{bmatrix}
-\end{align}
+\subsection{The Results of Pseudo-Alignment}
+The pseudo-alignment procedure was implemented on the Jaffe \textit{et al.} data
+through the use of the \textbf{kallisto} command line tool. Using a publicly
+available trascriptome assembled from the GRCh38 (hg19) \textit{Homo sapiens}
+genome, sets of paired-end RNA-Seq reads for each of the 12 subjects involved in
+the study were pseudo-aligned, resulting in count tables mapping each set of
+reads to \textbf{173,259} transcriptomic objects. Tables of counts are produced
+for each set of paired-end RNA-Seq reads for each subject in a tab-separated
+file format; these files are suitable for concatenation into a count table for
+all subjects, which can be subjected to statistical analysis after appropriate
+data cleaning. For reference, alongside this document, a sample file (in JSON
+format) indicating the results of running \textbf{kallisto} on data from a
+single subject is provided.
 
 \end{document}
