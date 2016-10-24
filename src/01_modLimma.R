@@ -14,7 +14,7 @@ tt <- limma::topTable(vfit_simple,
 # clean up topTable output to generate results tables
 tt_out <- tt %>%
   dplyr::mutate(
-    ID = pseudocounts_filtered$target_id,
+    geneID = geneIDs,
     lowerCI = exp(CI.L),
     FoldChange = exp(logFC),
     upperCI = exp(CI.R),

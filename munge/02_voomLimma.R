@@ -18,13 +18,19 @@ colnames(design_simple) <- c("intercept", "type")
 
 # filter pseudocounts table before proceeding with analysis
 library(limma)
-pseudocounts_filtered <- pseudocounts %>%
-  dplyr::filter((rowMeans(.[, -1]) > countsCutoff))
-
-v_simple <- voomWithQualityWeights(pseudocounts_filtered[, -1], design_simple,
-                 normalization = "none", plot = TRUE, save.plot = TRUE)
-
+pseudocounts_filtered <- pseudocounts_genes %>%
+  dplyr::filter((rowMeans(.[, -ncol(.)]) > countsCutoff))
+geneIDs <- pseudocounts_filtered$geneID
+pseudocounts_filtered <- subset(pseudocounts_filtered,
+                                select = -c(geneID))
+                                  
+pdf(file = paste0(proj_dir, "/graphs/meanVarVoom_trend.pdf"))
+v_simple <- voomWithQualityWeights(pseudocounts_filtered, design_simple,
+                                   normalization = "none", plot = TRUE,
+                                   save.plot = TRUE)
+dev.off()
 
 # clean up workspace before moving on...
 rm(list = setdiff(ls(), c("v_simple", "proj_dir", "data_dir", "design_simple",
-                          "codebook", "phenodata", "pseudocounts_filtered")))
+                          "codebook", "phenodata", "pseudocounts_filtered",
+                          "geneIDs", "pseudocounts_genes", "txi")))
