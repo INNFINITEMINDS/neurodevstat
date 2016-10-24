@@ -32,5 +32,6 @@ nmf.options(grid.patch = TRUE)
 pdf(file = paste0(getwd(), paste0("/graphs/heatmap_top", no_topgenes,
                                   "genes.pdf")))
 aheatmap(exprs, scale = "row", annCol = label, annColors = "Set2",
-         main = paste("Heatmap of Top", no_topgenes, "Genes (by FDR)"))
+         main = paste("Heatmap of Top", no_topgenes,
+                      "Genes \n (ranked by FDR)"))
 dev.off()
