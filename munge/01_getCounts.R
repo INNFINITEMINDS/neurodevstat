@@ -1,10 +1,11 @@
 # load and clean quantified transcript outputfrom Kallisto pseudoalignment
 
+rm(list = ls())
 proj_dir <- paste0(path.expand("~"), "/git_repos/neurodevstat")
 data_dir <- paste0(proj_dir, "/data/data_Jaffe2015/quantKallisto")
 
 library(data.table); library(dplyr); library(dtplyr)
-set.seed(280916)
+set.seed(6401^2)
 
 # find data files, load, and combine via list manipulations
 filenames <- list.files(path = data_dir, pattern = "abundance.tsv",
@@ -25,6 +26,8 @@ for (i in 1:length(data_reduced)) {
                                           sep = "_")
 }
 
-# build finalized table of pseudocounts and filter
+# build table of pseudocounts
 pseudocounts <- Reduce(function(...) merge(..., by = "target_id"), data_reduced)
 
+# save raw data set
+data.table::fwrite(pseudocounts, paste0(getwd(), "/data/pseudocounts_raw.csv"))
