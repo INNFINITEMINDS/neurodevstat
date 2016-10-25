@@ -1,8 +1,3 @@
-# setting up necessary preliminaries for statistical analysis
-
-library(ProjectTemplate)
-load.project()
-
 # fit linear models to each gene using voom with simple design matrix
 vfit_simple <- limma::lmFit(v_simple)
 vfit_simple <- limma::eBayes(vfit_simple)

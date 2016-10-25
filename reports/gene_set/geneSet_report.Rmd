@@ -1,0 +1,27 @@
+---
+title: "Gene set analysis of RNA-Seq data"
+author: "[Nima Hejazi](http://nimahejazi.org)"
+date: '`r format(Sys.time(), "%Y %b %d (%a), %H:%M:%S")`'
+abstract: |
+  We provide an analytical plan to evaluate the effects of performing gene
+  knockouts in yeast using CRISPR biotechnology. The methods presented rely on
+  fewer assumptions than are inherent in (competing) methods that rely on the
+  Negative Binomial family of distributions. In particular, we use the "voom"
+  method of the popular linear modeling R package
+  [`Limma`](http://www.statsci.org/smyth/pubs/limma-biocbook-reprint.pdf) to
+  model the mean-variance relationship rather than raw read counts, providing a
+  way to detect differential expression while preserving asymptotically correct
+  statistical inference.
+output: pdf_document
+bibliography: citations.bib
+---
+
+# Introduction
+
+# Results
+
+---
+
+\newpage
+
+# References
