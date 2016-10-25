@@ -55,3 +55,13 @@ rownames(pseudocounts_genes) <- NULL
 # save raw pseudocounts at the transcript level
 data.table::fwrite(pseudocounts_genes, paste0(proj_dir,
                                               "/data/pseudocounts_genes.csv"))
+
+
+# obtain pseudocount results scaled as transcripts per million (TpM)
+txiTPM <- tximport(filenames, type = "kallisto", tx2gene = tx2gene,
+                   reader = read_tsv, countsFromAbundance = "scaledTPM")
+pseudocounts_TPM <- as.data.frame(txiTPM$counts)
+colnames(pseudocounts_TPM) <- sapply(strsplit(filenames, split = "/"),
+                                     function(x) x[9])
+pseudocounts_TPM$geneID <- rownames(pseudocounts_TPM)
+rownames(pseudocounts_TPM) <- NULL
