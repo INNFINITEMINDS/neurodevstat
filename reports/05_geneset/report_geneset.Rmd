@@ -1,5 +1,5 @@
 ---
-title: "Statistical analysis of RNA-Seq pseudocounts from Jaffe et al."
+title: "Gene set analysis of RNA-Seq data from Jaffe et al."
 author: "[Nima Hejazi](http://nimahejazi.org)"
 date: '`r format(Sys.time(), "%Y %b %d (%a), %H:%M:%S")`'
 abstract: |
@@ -14,6 +14,8 @@ abstract: |
   statistical inference.
 output: pdf_document
 bibliography: citations.bib
+theme: journal
+highlight: haddock
 ---
 
 # Introduction

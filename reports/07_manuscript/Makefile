@@ -1,4 +1,4 @@
-TITLE=report_eda
+TITLE=manuscript
 
 report:
 	Rscript -e "rmarkdown::render('./$(TITLE).Rmd')"
