@@ -1,0 +1,30 @@
+---
+title: "Exploratory data analysis of RNA-Seq pseudocounts"
+author: "[Nima Hejazi](http://nimahejazi.org)"
+date: '`r format(Sys.time(), "%Y %b %d (%a), %H:%M:%S")`'
+output: pdf_document
+theme: journal
+highlight: haddock
+---
+
+# Introduction
+
+Why exploratory data analysis?
+
+
+# Data Visualization
+
+
+
+---
+
+\newpage
+
+# Reproducibility Notice
+
+What follows is the _session information_ associated with the R session in which
+this report was compiled:
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+pander::pander(sessionInfo())
+```

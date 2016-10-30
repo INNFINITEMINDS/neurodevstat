@@ -5,7 +5,6 @@ phenodata <- data.table::fread(paste0(proj_dir, "/data/phenodata.tsv"),
                                sep = "\t")
 
 n = nrow(codebook) #sample size
-countsCutoff <- 10 # cutoff for mean of counts for dropping genes
 
 # build simple design matrix for first pass analysis
 subj_type <- codebook$Sample_Type[order(as.numeric(substr(codebook$run_ID_1,
