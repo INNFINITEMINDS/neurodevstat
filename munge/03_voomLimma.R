@@ -18,14 +18,14 @@ pseudocounts_filtered <- subset(pseudocounts_filtered,
                                 select = -c(geneID))
 
 # apply Voom transform to filtered RNA-seq data with minimal design matrix
-pdf(file = paste0(proj_dir, "/graphs/voomTrend_simple.pdf"))
+pdf(file = paste0(proj_dir, "/graphs/voomTrend_simplemod.pdf"))
 v_simple <- voomWithQualityWeights(pseudocounts_filtered, design_simple,
                                    normalization = "scale", plot = TRUE,
                                    save.plot = TRUE)
 dev.off()
 
 # apply Voom transform to filtered RNA-seq data with full design matrix
-pdf(file = paste0(proj_dir, "/graphs/voomTrend_full.pdf"))
+pdf(file = paste0(proj_dir, "/graphs/voomTrend_fullmod.pdf"))
 v_full <- voomWithQualityWeights(pseudocounts_filtered, design_full,
                                  normalization = "scale", plot = TRUE,
                                  save.plot = TRUE)

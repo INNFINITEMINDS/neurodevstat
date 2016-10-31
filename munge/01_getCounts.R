@@ -46,7 +46,8 @@ txdf <- transcripts(EnsDb.Hsapiens.v79, columns = c("tx_id", "gene_name"),
                     return.type = "DataFrame")
 tx2gene <- as.data.frame(txdf)
 txi <- tximport(filenames, type = "kallisto", tx2gene = tx2gene,
-                reader = read_tsv)
+                reader = read_tsv) #, countsFromAbundance = "scaledTPM")
+# consider using scaled transcripts for downstream analysis instead of counts...
 pseudocounts_genes <- as.data.frame(txi$counts)
 colnames(pseudocounts_genes) <- sapply(strsplit(filenames, split = "/"),
                                        function(x) x[9])
