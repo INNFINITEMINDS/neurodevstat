@@ -36,8 +36,9 @@ for (i in 1:length(data_reduced)) {
 pseudocounts <- Reduce(function(...) merge(..., by = "target_id"), data_reduced)
 
 # save raw pseudocounts at the transcript level
-data.table::fwrite(pseudocounts, paste0(proj_dir,
-                                        "/data/pseudocounts_transcripts.csv"))
+suppressMessages(fwrite(pseudocounts,
+                        paste0(proj_dir,
+                               "/data/pseudocounts_transcripts.csv")))
 
 
 # summarize data from transcript to genes for modeling and inference
@@ -53,8 +54,9 @@ pseudocounts_genes$geneID <- rownames(pseudocounts_genes)
 rownames(pseudocounts_genes) <- NULL
 
 # save raw pseudocounts at the transcript level
-data.table::fwrite(pseudocounts_genes, paste0(proj_dir,
-                                              "/data/pseudocounts_genes.csv"))
+suppressMessages(fwrite(pseudocounts_genes,
+                        paste0(proj_dir,
+                               "/data/pseudocounts_genes.csv")))
 
 
 # obtain pseudocount results scaled as transcripts per million (TpM)
