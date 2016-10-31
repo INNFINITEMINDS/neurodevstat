@@ -38,7 +38,7 @@ pseudocounts_pc <- prcomp(t(pseudocounts_filtNorm),
 # PCA biplots of filtered + normalized counts
 pdf(file = paste0(proj_dir, "/graphs/pca_biplot_type.pdf"))
 g1 <- ggbiplot(pseudocounts_pc, obs.scale = 1, var.scale = 1, 
-               groups = ifelse(design_full$type == 1, "Adult", "Fetal"),
+               groups = ifelse(design_full$type == 1, "Fetal", "Adult"),
                var.axes = FALSE, ellipse = FALSE, circle = FALSE)
 g1 <- g1 + scale_color_manual(values = pal1, name = "type")
 g1 <- g1 + ggtitle("PCA Biplot of Samples")

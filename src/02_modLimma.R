@@ -19,4 +19,4 @@ tt_out <- tt %>%
   dplyr::select(which(colnames(.) %ni% colnames(tt)))
 
 data.table::fwrite(data.table(data.frame(tt_out)),
-                   file.path = paste0(proj_dir, "/results/ttLimma_simple.csv"))
+                   file = paste0(proj_dir, "/results/ttLimma_simple.csv"))

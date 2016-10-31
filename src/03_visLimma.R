@@ -7,11 +7,11 @@ no_topgenes <- 25
 # examine whether subject specific weights might be necessary
 pdf(file = paste0(proj_dir, "/graphs/samples_MDS.pdf"))
 plotMDS(pseudocounts_filtered, pch = 19,
-        col = ifelse(design_simple$type == 0, pal[1], pal[2]),
+        col = ifelse(design_simple$type == 0, pal1[1], pal1[2]),
         labels = colnames(pseudocounts_filtered),
         main = "MDS Plot of Samples")
 legend("topleft", legend = c("Adult", "Fetal"),
-       col = c(pal[1], pal[2]), pch = 19)
+       col = c(pal1[1], pal1[2]), pch = 19)
 dev.off()
 
 
