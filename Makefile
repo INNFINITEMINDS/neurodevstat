@@ -1,4 +1,4 @@
-.PHONY : all
+.PHONY : analysis
 
 dataSRA :
 	python preprocess/01_dumpData.py
@@ -11,11 +11,8 @@ pseudoalign :
 	python3 preprocess/04_pseudoAlign.py
 
 analysis :
-	R CMD BATCH src/01_setAnalysis.R
-	R CMD BATCH src/02_fitAnalysis.R
-	R CMD BATCH src/03_visAnalysis.R
+	R CMD BATCH src/01_eda.R
+	R CMD BATCH src/02_modLimma.R
+	R CMD BATCH src/03_visLimma.R
 
-report :
-	Rscript -e "library(knitr); Rmarkdown::render('reports/analysis.Rmd')"
-
-all : pseudoalign analysis report
+all : pseudoalign analysis
