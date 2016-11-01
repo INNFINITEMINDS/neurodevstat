@@ -23,7 +23,7 @@ This project constitutes...
 
 ## References
 
-1. [A.E. Jaffe _et al._. "Developmental regulation of human cortex transcription
+1. [A.E. Jaffe _et al_. "Developmental regulation of human cortex transcription
     and its clinical relevance at base resolution." _Nature Neuroscience_,
     2014](http://www.nature.com/neuro/journal/v18/n1/abs/nn.3898.html).
 
@@ -74,4 +74,5 @@ offered by the Johns Hopkins University, on Coursera.
 
 &copy; 2016 [Nima Hejazi](http://nimahejazi.org)
 
-This repository is licensed under the MIT license. See `LICENSE` for details.
+The contents of this repository are distributed under the MIT license. See file
+`LICENSE` for details.

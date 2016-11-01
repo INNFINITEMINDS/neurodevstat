@@ -57,18 +57,22 @@ dev.off()
 
 # volcano plot of fold change results by genes from simple model
 tt_out1_gg <- tt_out1 %>%
+  dplyr::arrange(fdrBH) %>%
   dplyr::mutate(
     geneID = I(geneID),
     logFC = log2(FoldChange),
     logPval = -log10(pvalue),
-    color = ifelse((logFC > 2.0) & (logPval > 1.3), "1",
-                   ifelse((logFC < -2.0) & (logPval > 1.3), "-1", "0"))
+    color = ifelse((logFC > 5.0) & (fdrBH < 0.01), "1",
+                   ifelse((logFC < -5.0) & (fdrBH < 0.01), "-1", "0")),
+    top = c(rep(1, 50), rep(0, length(geneIDs) - 50))
   ) %>%
   dplyr::select(which(colnames(.) %in% c("geneID", "logFC", "logPval",
-                                         "color")))
+                                         "color", "top")))
 pdf(file = paste0(getwd(), paste0("/graphs/volcano_simplemod_genes.pdf")))
 p3 <- ggplot(tt_out1_gg, aes(x = logFC, y = logPval)) +
   geom_point(aes(colour = color)) +
+  geom_text(aes(label = ifelse(top != 0, as.character(geneID), '')),
+            hjust = 0, vjust = 0, check_overlap = TRUE) +
   xlab("log2(Fold Change)") + ylab("-log10(raw p-value)") +
   ggtitle("Volcano Plot \n (from simple model)") +
   scale_colour_manual(values = pal2[1:3], guide = FALSE)
@@ -77,18 +81,22 @@ dev.off()
 
 # volcano plot of fold change results by genes from full model
 tt_out2_gg <- tt_out2 %>%
+  dplyr::arrange(fdrBH) %>%
   dplyr::mutate(
     geneID = I(geneID),
     logFC = log2(FoldChange),
     logPval = -log10(pvalue),
-    color = ifelse((logFC > 2.0) & (logPval > 1.3), "1",
-                   ifelse((logFC < -2.0) & (logPval > 1.3), "-1", "0"))
+    color = ifelse((logFC > 5.0) & (fdrBH < 0.10), "1",
+                   ifelse((logFC < -5.0) & (fdrBH < 0.10), "-1", "0")),
+    top = c(rep(1, 50), rep(0, length(geneIDs) - 50))
   ) %>%
   dplyr::select(which(colnames(.) %in% c("geneID", "logFC", "logPval",
-                                         "color")))
+                                         "color", "top")))
 pdf(file = paste0(getwd(), paste0("/graphs/volcano_fullmod_genes.pdf")))
 p4 <- ggplot(tt_out2_gg, aes(x = logFC, y = logPval)) +
   geom_point(aes(colour = color)) +
+  geom_text(aes(label = ifelse(top != 0, as.character(geneID), '')),
+            hjust = 0, vjust = 0, check_overlap = TRUE) +
   xlab("log2(Fold Change)") + ylab("-log10(raw p-value)") +
   ggtitle("Volcano Plot \n (from full model)") +
   scale_colour_manual(values = pal2[1:3], guide = FALSE)

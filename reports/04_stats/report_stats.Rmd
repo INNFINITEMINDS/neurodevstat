@@ -3,7 +3,12 @@ title: "Statistical analysis of RNA-Seq pseudocounts"
 author: "[Nima Hejazi](http://nimahejazi.org)"
 date: '`r format(Sys.time(), "%Y %b %d (%a), %H:%M:%S")`'
 abstract: |
-  Basic description goes here...
+  We present the results of performing linear modeling to determine differential
+  expression of genes in the RNA-seq sample based on the method of `limma-voom`.
+  Both a simple and full model were used to analyze differential expression of
+  genes, and several visualizations of the analytic results are given, including
+  two volcano plots as well as a heatmap of differential expression across
+  sample groups.
 output: pdf_document
 bibliography: citations.bib
 toc: true
@@ -13,9 +18,335 @@ highlight: haddock
 
 # I. Introduction
 
-# II. Methodology
+The statistical analysis procedure documented here uses the `limma-voom` method
+for performing linear modeling with RNA-seq pseudocounts produced by using the
+[(pseudo)alignment algorithm of Bray _et al._
+(2016)](http://www.nature.com/nbt/journal/v34/n5/full/nbt.3519.html) with the
+[`Kallisto` software](https://pachterlab.github.io/kallisto/about). Since the
+alignment procedure differs slightly from that used in standard alignment
+software (_e.g._, `bowtie`), the counts are not integers; please consult the
+documentation of these tools if there are concerns about the method employed.
+After importing the transcript quantification results produced by the `Kallisto`
+aligner, the `tximport` R package was used to perform gene-level summarization.
+Following this, after performing elementary filtering on the gene-level
+quantification results, the method of `limma-voom` was employed to analyze the
+(pseudo)counts with two different modeling procedures: (1) the first using a
+simple design matrix containing an intercept term and a term for fetal vs. adult
+samples; and (2) the second using a more complex design matrix containing an
+intercept term, a term for the sample type (fetal vs. adult), a term for the sex
+of the sample, a term for the sample age, a term for the race of the sample, and
+a term for the quality of the sample (as measured by RIN).
 
-# III. Results
+Below, we present the results of applying the `limma-voom` modeling procedure,
+including tables of the top 10 genes showing differential expression (based on
+the Benjamini-Hochberg FDR), as well as several visualizations produced from the
+results of the statistical analysis described above.
+
+---
+
+\newpage
+
+# II. Methodology and Results
+
+```{r getCounts, echo=FALSE, message=FALSE, warning=FALSE}
+rm(list = ls())
+proj_dir <- paste0(path.expand("~"), "/git_repos/neurodevstat")
+data_dir <- paste0(proj_dir, "/data/data_Jaffe2015/quantKallisto")
+
+set.seed(6401^2)
+library(dplyr)
+library(data.table)
+library(dtplyr)
+library(readr)
+library(tximport)
+library(EnsDb.Hsapiens.v79)
+
+# find data files, load, and combine via list manipulations
+filenames <- list.files(path = data_dir, pattern = "abundance.tsv",
+                        full.names = TRUE, recursive = TRUE)
+
+data_list <- lapply( filenames, function(x) { read.csv(file = x, sep = "\t",
+                                                       header = TRUE) } )
+
+names(data_list) <- sapply(strsplit(filenames, "/"), function(x) {
+  grep("SRR", x, value = TRUE) })
+
+data_reduced <- lapply( data_list, function(x) {
+  subset(x, select = c("target_id", "est_counts")) })
+
+for (i in 1:length(data_reduced)) {
+  colnames(data_reduced[[i]])[2] <- paste(names(data_reduced)[i],
+                                          colnames(data_reduced[[i]])[2],
+                                          sep = "_")
+}
+
+# build table of pseudocounts
+pseudocounts <- Reduce(function(...) merge(..., by = "target_id"), data_reduced)
+
+# summarize data from transcript to genes for modeling and inference
+txdf <- transcripts(EnsDb.Hsapiens.v79, columns = c("tx_id", "gene_name"),
+                    return.type = "DataFrame")
+tx2gene <- as.data.frame(txdf)
+txi <- tximport(filenames, type = "kallisto", tx2gene = tx2gene,
+                reader = read_tsv) #, countsFromAbundance = "scaledTPM")
+# consider using scaled transcripts for downstream analysis instead of counts...
+pseudocounts_genes <- as.data.frame(txi$counts)
+colnames(pseudocounts_genes) <- sapply(strsplit(filenames, split = "/"),
+                                       function(x) x[9])
+pseudocounts_genes$geneID <- rownames(pseudocounts_genes)
+rownames(pseudocounts_genes) <- NULL
+
+# obtain pseudocount results scaled as transcripts per million (TpM)
+txiTPM <- tximport(filenames, type = "kallisto", tx2gene = tx2gene,
+                   reader = read_tsv, countsFromAbundance = "scaledTPM")
+pseudocounts_TPM <- as.data.frame(txiTPM$counts)
+colnames(pseudocounts_TPM) <- sapply(strsplit(filenames, split = "/"),
+                                     function(x) x[9])
+pseudocounts_TPM$geneID <- rownames(pseudocounts_TPM)
+rownames(pseudocounts_TPM) <- NULL
+```
+
+```{r makeDesign, echo=FALSE, message=FALSE, warning=FALSE}
+# build design matrices for "simple" and "full" linear modeling analysis
+
+codebook <- data.table::fread(paste0(proj_dir, "/data/codebook.csv"))
+phenodata <- data.table::fread(paste0(proj_dir, "/data/phenodata.tsv"),
+                               sep = "\t")
+
+n = nrow(codebook) #sample size
+
+# build simple design matrix for first pass analysis
+subj_type <- codebook$Sample_Type[order(as.numeric(substr(codebook$run_ID_1,
+                                                          4, 10)))]
+design_simple <- data.frame(cbind(rep(1, n),
+                                  (as.numeric(as.factor(subj_type)) - 1)))
+colnames(design_simple) <- c("intercept", "type")
+
+
+# build full design matrix for linear modeling analysis
+pData <- merge(data.table(phenodata), data.table(codebook),
+               by.x = "sample_ID", by.y = "Sample_ID")
+design_full <- pData %>%
+  dplyr::mutate(
+    intercept = rep(1, nrow(.)),
+    type = (as.numeric(as.factor(pData$Sample_Type)) - 1),
+    age = I(age),
+    sex = ifelse(sex == "male", 0, 1),
+    race = (as.numeric(as.factor(race)) - 1),
+    RIN = I(RIN)
+  ) %>%
+  dplyr::select(which(colnames(.) %in% c("intercept", "type", "age", "sex",
+                                         "race", "RIN")))
+design_full <- data.frame(design_full$intercept, design_full$type,
+                          design_full$sex, design_full$age, design_full$race,
+                          design_full$RIN)
+colnames(design_full) <- c("intercept", "type", "sex", "age", "race", "RIN")
+design_full <- as.data.frame(sapply(design_full, as.numeric))
+```
+
+```{r voomLimma, echo=FALSE, include=FALSE, message=FALSE, warning=FALSE}
+# build modeling weights using Limma's voom method
+
+library(limma)
+countsCutoff <- 10 # cutoff for mean of counts for dropping genes
+
+# filter pseudocounts table before proceeding with analysis
+pseudocounts_filtered <- pseudocounts_genes %>%
+  dplyr::filter((rowMeans(.[, -ncol(.)]) > countsCutoff))
+
+# remove outstanding genes with extremely high values
+geneMaxInd <- unlist(unique(lapply(pseudocounts_filtered[, -13],
+                                   FUN = which.max)))
+pseudocounts_filtered <- pseudocounts_filtered[-geneMaxInd, ]
+
+# get gene IDs for those remaining in the data set
+geneIDs <- pseudocounts_filtered$geneID
+pseudocounts_filtered <- subset(pseudocounts_filtered,
+                                select = -c(geneID))
+
+# apply Voom transform to filtered RNA-seq data with minimal design matrix
+pdf(file = paste0(proj_dir, "/graphs/voomTrend_simplemod.pdf"))
+v_simple <- voomWithQualityWeights(pseudocounts_filtered, design_simple,
+                                   normalization = "scale", plot = TRUE,
+                                   save.plot = TRUE)
+dev.off()
+
+# apply Voom transform to filtered RNA-seq data with full design matrix
+pdf(file = paste0(proj_dir, "/graphs/voomTrend_fullmod.pdf"))
+v_full <- voomWithQualityWeights(pseudocounts_filtered, design_full,
+                                 normalization = "scale", plot = TRUE,
+                                 save.plot = TRUE)
+dev.off()
+
+# clean up workspace before moving on...
+rm(list = setdiff(ls(), c("proj_dir", "data_dir", "geneIDs", "design_simple",
+                          "design_full", "txi", "txiTPM", "pseudocounts_genes",
+                          "pseudocounts_TPM", "pseudocounts_filtered", "v_full",
+                          "v_simple")))
+```
+
+```{r preliminaries, echo=FALSE, message=FALSE, warning=FALSE}
+library(reshape2)
+library(ggplot2)
+library(ggbiplot)
+library(wesanderson)
+library(NMF)
+pal1 <- wes_palette("Chevalier", n = 2, type = "discrete")
+pal2 <- wes_palette("Darjeeling", type = "continuous")
+no_topgenes <- 25
+```
+
+The linear modeling procedure of `limma-voom` was invoked (see code below), and
+the tables of the __top 10 genes__ for each modeling paradigm are given below:
+
+```{r simpleLimmaMod, message=FALSE, warning=FALSE}
+# fit linear models to each gene using voom with simple design matrix
+vfit_simple <- limma::lmFit(v_simple)
+vfit_simple <- limma::eBayes(vfit_simple)
+tt1 <- limma::topTable(vfit_simple,
+                       coef = which(colnames(design_simple) == "type"),
+                       adjust.method = "BH", number = Inf,
+                       sort.by = "none", confint = TRUE)
+```
+
+```{r simpleModTopTable, echo=FALSE, message=FALSE, warning=FALSE}
+tt_out1 <- tt1 %>%
+  dplyr::mutate(
+    geneID = geneIDs,
+    lowerCI = exp(CI.L),
+    FoldChange = exp(logFC),
+    upperCI = exp(CI.R),
+    pvalue = I(P.Value),
+    fdrBH = I(adj.P.Val)
+  ) %>%
+  dplyr::select(which(colnames(.) %ni% colnames(tt1))) %>%
+  dplyr::arrange(fdrBH)
+pander::pander(head(tt_out1, 10))
+```
+
+```{r fullLimmaMod, message=FALSE, warning=FALSE}
+# fit linear models to each gene using voom with the full design matrix
+vfit_full <- limma::lmFit(v_full)
+vfit_full <- limma::eBayes(vfit_full)
+tt2 <- limma::topTable(vfit_full,
+                       coef = which(colnames(design_full) == "type"),
+                       adjust.method = "BH", number = Inf,
+                       sort.by = "none", confint = TRUE)
+```
+
+```{r fullModTopTable, echo=FALSE, message=FALSE, warning=FALSE}
+tt_out2 <- tt2 %>%
+  dplyr::mutate(
+    geneID = geneIDs,
+    lowerCI = exp(CI.L),
+    FoldChange = exp(logFC),
+    upperCI = exp(CI.R),
+    pvalue = I(P.Value),
+    fdrBH = I(adj.P.Val)
+  ) %>%
+  dplyr::select(which(colnames(.) %ni% colnames(tt2))) %>%
+  dplyr::arrange(fdrBH)
+pander::pander(head(tt_out2, 10))
+```
+
+---
+
+\newpage
+
+# III. Data Visualization
+
+The volcano plot below displays the differential expression (as measured by fold
+change) against the transformed p-values, for the simple linear model containing
+terms for an intercept and the sample type (adult vs. fetal). Those genes for
+which the log10 fold change is above __5__ and the Benjamini-Hochberg adjusted
+p-value is below __0.01__ are denoted by the warmer colors (_i.e._, red, yellow)
+and the gene symbols for the _top 50 genes_ (as ranked by the Benjamini-Hochberg
+FDR) are displayed on the plot.
+
+```{r simpleModVolcano, echo=FALSE, message=FALSE, warning=FALSE}
+# volcano plot of fold change results by genes from simple model
+tt_out1_gg <- tt_out1 %>%
+  dplyr::arrange(fdrBH) %>%
+  dplyr::mutate(
+    geneID = I(geneID),
+    logFC = log2(FoldChange),
+    logPval = -log10(pvalue),
+    color = ifelse((logFC > 5.0) & (fdrBH < 0.01), "1",
+                   ifelse((logFC < -5.0) & (fdrBH < 0.01), "-1", "0")),
+    top = c(rep(1, 50), rep(0, length(geneIDs) - 50))
+  ) %>%
+  dplyr::select(which(colnames(.) %in% c("geneID", "logFC", "logPval",
+                                         "color", "top")))
+p3 <- ggplot(tt_out1_gg, aes(x = logFC, y = logPval)) +
+  geom_point(aes(colour = color)) +
+  geom_text(aes(label = ifelse(top != 0, as.character(geneID), '')),
+            hjust = 0, vjust = 0, check_overlap = TRUE) +
+  xlab("log2(Fold Change)") + ylab("-log10(raw p-value)") +
+  ggtitle("Volcano Plot \n (from simple model)") +
+  scale_colour_manual(values = pal2[1:3], guide = FALSE)
+print(p3)
+```
+
+\newpage
+
+The volcano plot below displays the differential expression (as measured by fold
+change) against the transformed p-values, for the full linear model containing
+terms for an intercept, the sample type (adult vs. fetal), the sex of the
+sample, the sample age, the race of the sample, and the quality of the sample
+(as measured by RIN). Those genes for which the log10 fold change is above __5__
+and the Benjamini-Hochberg adjusted p-value is below __0.10__ are denoted by the
+warmer colors (_i.e._, red, yellow) and the gene symbols for the _top 50 genes_
+(as ranked by the Benjamini-Hochberg FDR) are displayed on the plot.
+
+```{r fullModVolcano, echo=FALSE, message=FALSE, warning=FALSE}
+# volcano plot of fold change results by genes from full model
+tt_out2_gg <- tt_out2 %>%
+  dplyr::arrange(fdrBH) %>%
+  dplyr::mutate(
+    geneID = I(geneID),
+    logFC = log2(FoldChange),
+    logPval = -log10(pvalue),
+    color = ifelse((logFC > 5.0) & (fdrBH < 0.10), "1",
+                   ifelse((logFC < -5.0) & (fdrBH < 0.10), "-1", "0")),
+    top = c(rep(1, 50), rep(0, length(geneIDs) - 50))
+  ) %>%
+  dplyr::select(which(colnames(.) %in% c("geneID", "logFC", "logPval",
+                                         "color", "top")))
+p4 <- ggplot(tt_out2_gg, aes(x = logFC, y = logPval)) +
+  geom_point(aes(colour = color)) +
+  geom_text(aes(label = ifelse(top != 0, as.character(geneID), '')),
+            hjust = 0, vjust = 0, check_overlap = TRUE) +
+  xlab("log2(Fold Change)") + ylab("-log10(raw p-value)") +
+  ggtitle("Volcano Plot \n (from full model)") +
+  scale_colour_manual(values = pal2[1:3], guide = FALSE)
+print(p4)
+```
+
+\newpage
+
+The heatmap below displays the normalized expression results of the top 25 genes
+with the highest differential expression across the groupings of the samples,
+with hierarchical clustering performed across both the 12 samples and the top 25
+genes. From the plot, it appears that those genes showing heightened
+differential expression in the fetal group display lowered expression in the
+adult samples.
+
+```{r fullModHeatmap, echo=FALSE, message=FALSE, warning=FALSE}
+tt_out_ranked <- tt_out2[order(tt_out2$fdrBH), ]
+tt_topgenes <- tt_out_ranked[1:no_topgenes, ]
+exprs <- as.matrix(v_full$E[as.numeric(row.names(tt_topgenes)), ])
+colnames(exprs) <- substr(colnames(exprs), 1, 10)
+rownames(exprs) <- tt_topgenes$geneID
+
+label <- data.frame(Type = ifelse(design_simple$type == 0, "Adult", "Fetal"))
+rownames(label) <- substr(colnames(exprs), 1, 10)
+
+# heatmap of top 25 genes across samples from full model
+nmf.options(grid.patch = TRUE)
+aheatmap(exprs, scale = "row", annCol = label, annColors = "Set2",
+         main = paste("Heatmap of Top", no_topgenes,
+                      "Genes \n (ranked by FDR)"))
+```
 
 ---
 
@@ -27,7 +358,6 @@ What follows is the _session information_ associated with the R session in which
 this report was compiled:
 
 ```{r reproducibilityNote, warning=FALSE, message=FALSE, echo=FALSE}
-library(pander)
 pander::pander(sessionInfo())
 ```
 

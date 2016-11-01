@@ -16,7 +16,7 @@ tt_out1 <- tt1 %>%
     pvalue = I(P.Value),
     fdrBH = I(adj.P.Val)
   ) %>%
-  dplyr::select(which(colnames(.) %ni% colnames(tt)))
+  dplyr::select(which(colnames(.) %ni% colnames(tt1)))
 
 data.table::fwrite(data.table(data.frame(tt_out1)),
                    file = paste0(proj_dir, "/results/ttLimma_simplemod.csv"))
