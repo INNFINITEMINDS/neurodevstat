@@ -3,27 +3,381 @@ title: "Gene set analysis of RNA-Seq data from Jaffe et al."
 author: "[Nima Hejazi](http://nimahejazi.org)"
 date: '`r format(Sys.time(), "%Y %b %d (%a), %H:%M:%S")`'
 abstract: |
-  We provide an analytical plan to evaluate the effects of performing gene
-  knockouts in yeast using CRISPR biotechnology. The methods presented rely on
-  fewer assumptions than are inherent in (competing) methods that rely on the
-  Negative Binomial family of distributions. In particular, we use the "voom"
-  method of the popular linear modeling R package
-  [`Limma`](http://www.statsci.org/smyth/pubs/limma-biocbook-reprint.pdf) to
-  model the mean-variance relationship rather than raw read counts, providing a
-  way to detect differential expression while preserving asymptotically correct
-  statistical inference.
+  Having detected differentially expressed genes between neural cells extracted
+  from human adult and fetal samples, here, we report on findings from efforts
+  to assess the degree to which these differentially expressed genes may be
+  associated with the __H3K4me3__ histone modification by examining promoter
+  regions of a conservative set of reference genes (_RefSeq_) displaying
+  __H3K4me3__ changes across human brain and liver cell lines. Here, we make use
+  of a permutation-based approach to examine the proportion of the
+  differentially expressed genes that are present in H3K4me3 promoters of the
+  reference genes across liver and brain cell lines, deriving exact p-values
+  for the proportion of genes in each of these tissue classes.
 output: pdf_document
-bibliography: citations.bib
 theme: journal
 highlight: haddock
 ---
 
-# Introduction
+```{r getCounts, echo=FALSE, message=FALSE, warning=FALSE}
+rm(list = ls())
+proj_dir <- paste0(path.expand("~"), "/git_repos/neurodevstat")
+data_dir <- paste0(proj_dir, "/data/data_Jaffe2015/quantKallisto")
 
-# Results
+set.seed(6401^2)
+library(dplyr)
+library(data.table)
+library(dtplyr)
+library(readr)
+library(tximport)
+library(EnsDb.Hsapiens.v79)
 
----
+# find data files, load, and combine via list manipulations
+filenames <- list.files(path = data_dir, pattern = "abundance.tsv",
+                        full.names = TRUE, recursive = TRUE)
 
-\newpage
+data_list <- lapply( filenames, function(x) { read.csv(file = x, sep = "\t",
+                                                       header = TRUE) } )
 
-# References
+names(data_list) <- sapply(strsplit(filenames, "/"), function(x) {
+  grep("SRR", x, value = TRUE) })
+
+data_reduced <- lapply( data_list, function(x) {
+  subset(x, select = c("target_id", "est_counts")) })
+
+for (i in 1:length(data_reduced)) {
+  colnames(data_reduced[[i]])[2] <- paste(names(data_reduced)[i],
+                                          colnames(data_reduced[[i]])[2],
+                                          sep = "_")
+}
+
+# build table of pseudocounts
+pseudocounts <- Reduce(function(...) merge(..., by = "target_id"), data_reduced)
+
+# summarize data from transcript to genes for modeling and inference
+txdf <- transcripts(EnsDb.Hsapiens.v79, columns = c("tx_id", "gene_name"),
+                    return.type = "DataFrame")
+tx2gene <- as.data.frame(txdf)
+txi <- tximport(filenames, type = "kallisto", tx2gene = tx2gene,
+                reader = read_tsv) #, countsFromAbundance = "scaledTPM")
+# consider using scaled transcripts for downstream analysis instead of counts...
+pseudocounts_genes <- as.data.frame(txi$counts)
+colnames(pseudocounts_genes) <- sapply(strsplit(filenames, split = "/"),
+                                       function(x) x[9])
+pseudocounts_genes$geneID <- rownames(pseudocounts_genes)
+rownames(pseudocounts_genes) <- NULL
+
+# obtain pseudocount results scaled as transcripts per million (TpM)
+txiTPM <- tximport(filenames, type = "kallisto", tx2gene = tx2gene,
+                   reader = read_tsv, countsFromAbundance = "scaledTPM")
+pseudocounts_TPM <- as.data.frame(txiTPM$counts)
+colnames(pseudocounts_TPM) <- sapply(strsplit(filenames, split = "/"),
+                                     function(x) x[9])
+pseudocounts_TPM$geneID <- rownames(pseudocounts_TPM)
+rownames(pseudocounts_TPM) <- NULL
+```
+
+```{r makeDesign, echo=FALSE, message=FALSE, warning=FALSE}
+# build design matrices for "simple" and "full" linear modeling analysis
+
+codebook <- data.table::fread(paste0(proj_dir, "/data/codebook.csv"))
+phenodata <- data.table::fread(paste0(proj_dir, "/data/phenodata.tsv"),
+                               sep = "\t")
+
+n = nrow(codebook) #sample size
+
+# build simple design matrix for first pass analysis
+subj_type <- codebook$Sample_Type[order(as.numeric(substr(codebook$run_ID_1,
+                                                          4, 10)))]
+design_simple <- data.frame(cbind(rep(1, n),
+                                  (as.numeric(as.factor(subj_type)) - 1)))
+colnames(design_simple) <- c("intercept", "type")
+
+
+# build full design matrix for linear modeling analysis
+pData <- merge(data.table(phenodata), data.table(codebook),
+               by.x = "sample_ID", by.y = "Sample_ID")
+design_full <- pData %>%
+  dplyr::mutate(
+    intercept = rep(1, nrow(.)),
+    type = (as.numeric(as.factor(pData$Sample_Type)) - 1),
+    age = I(age),
+    sex = ifelse(sex == "male", 0, 1),
+    race = (as.numeric(as.factor(race)) - 1),
+    RIN = I(RIN)
+  ) %>%
+  dplyr::select(which(colnames(.) %in% c("intercept", "type", "age", "sex",
+                                         "race", "RIN")))
+design_full <- data.frame(design_full$intercept, design_full$type,
+                          design_full$sex, design_full$age, design_full$race,
+                          design_full$RIN)
+colnames(design_full) <- c("intercept", "type", "sex", "age", "race", "RIN")
+design_full <- as.data.frame(sapply(design_full, as.numeric))
+```
+
+```{r voomLimma, echo=FALSE, include=FALSE, message=FALSE, warning=FALSE}
+# build modeling weights using Limma's voom method
+
+library(limma)
+countsCutoff <- 10 # cutoff for mean of counts for dropping genes
+
+# filter pseudocounts table before proceeding with analysis
+pseudocounts_filtered <- pseudocounts_genes %>%
+  dplyr::filter((rowMeans(.[, -ncol(.)]) > countsCutoff))
+
+# remove outstanding genes with extremely high values
+geneMaxInd <- unlist(unique(lapply(pseudocounts_filtered[, -13],
+                                   FUN = which.max)))
+pseudocounts_filtered <- pseudocounts_filtered[-geneMaxInd, ]
+
+# get gene IDs for those remaining in the data set
+geneIDs <- pseudocounts_filtered$geneID
+pseudocounts_filtered <- subset(pseudocounts_filtered,
+                                select = -c(geneID))
+
+# apply Voom transform to filtered RNA-seq data with minimal design matrix
+pdf(file = paste0(proj_dir, "/graphs/voomTrend_simplemod.pdf"))
+v_simple <- voomWithQualityWeights(pseudocounts_filtered, design_simple,
+                                   normalization = "scale", plot = TRUE,
+                                   save.plot = TRUE)
+dev.off()
+
+# apply Voom transform to filtered RNA-seq data with full design matrix
+pdf(file = paste0(proj_dir, "/graphs/voomTrend_fullmod.pdf"))
+v_full <- voomWithQualityWeights(pseudocounts_filtered, design_full,
+                                 normalization = "scale", plot = TRUE,
+                                 save.plot = TRUE)
+dev.off()
+
+# clean up workspace before moving on...
+rm(list = setdiff(ls(), c("proj_dir", "data_dir", "geneIDs", "design_simple",
+                          "design_full", "txi", "txiTPM", "pseudocounts_genes",
+                          "pseudocounts_TPM", "pseudocounts_filtered", "v_full",
+                          "v_simple")))
+```
+
+```{r simpleLimmaMod, echo=FALSE, message=FALSE, warning=FALSE}
+# fit linear models to each gene using voom with simple design matrix
+vfit_simple <- limma::lmFit(v_simple)
+vfit_simple <- limma::eBayes(vfit_simple)
+tt1 <- limma::topTable(vfit_simple,
+                       coef = which(colnames(design_simple) == "type"),
+                       adjust.method = "BH", number = Inf,
+                       sort.by = "none", confint = TRUE)
+```
+
+```{r simpleModTopTable, echo=FALSE, message=FALSE, warning=FALSE}
+tt_out1 <- tt1 %>%
+  dplyr::mutate(
+    geneID = geneIDs,
+    lowerCI = exp(CI.L),
+    FoldChange = exp(logFC),
+    upperCI = exp(CI.R),
+    pvalue = I(P.Value),
+    fdrBH = I(adj.P.Val)
+  ) %>%
+  dplyr::select(which(colnames(.) %ni% colnames(tt1))) %>%
+  dplyr::arrange(fdrBH)
+```
+
+```{r fullLimmaMod, echo=FALSE, message=FALSE, warning=FALSE}
+# fit linear models to each gene using voom with the full design matrix
+vfit_full <- limma::lmFit(v_full)
+vfit_full <- limma::eBayes(vfit_full)
+tt2 <- limma::topTable(vfit_full,
+                       coef = which(colnames(design_full) == "type"),
+                       adjust.method = "BH", number = Inf,
+                       sort.by = "none", confint = TRUE)
+```
+
+```{r fullModTopTable, echo=FALSE, message=FALSE, warning=FALSE}
+tt_out2 <- tt2 %>%
+  dplyr::mutate(
+    geneID = geneIDs,
+    lowerCI = exp(CI.L),
+    FoldChange = exp(logFC),
+    upperCI = exp(CI.R),
+    pvalue = I(P.Value),
+    fdrBH = I(adj.P.Val)
+  ) %>%
+  dplyr::select(which(colnames(.) %ni% colnames(tt2))) %>%
+  dplyr::arrange(fdrBH)
+tt_out_ranked <- tt_out2[order(tt_out2$fdrBH), ]
+```
+
+```{r}
+library(AnnotationHub)
+library(pander)
+library(ggplot2)
+genes.sig <- tt_out_ranked %>%
+  subset(fdrBH < 0.25)
+pander(head(genes.sig))
+```
+
+First, let us merely examine the first few genes marked as differentially
+expressed between human fetal and adult neurons. Note that these genes were
+isolated from performing alignment on RNA-Seq transcripts using the
+__Kallisto__ pseudo-aligner and performing statistical analysis with the "voom"
+method of the popular `Limma` package for linear modeling in genomics. These
+genes were marked as being differentially expressed by using an _cutoff of the
+Benjamini-Hochberg procedure to control the False Discovery Rate of 25%_. The
+association of the full set of differentially expressed genes with H3K4me3
+promoters in brain and liver tissue will be assessed below via permutation
+testing.
+
+```{r}
+# set up Annotation Hub for extracting metadata
+ah <- AnnotationHub()
+ah <- subset(ah, species == "Homo sapiens")
+qhs <- query(ah, "H3K4me3")
+roadmap <- subset(qhs, dataprovider == "BroadInstitute")
+```
+
+Above, we merely set up an `AnnotationHub` object and extract relevant data by
+a set of queries to narrow our search.
+
+```{r}
+# get genes with H3K4me3 in Brain cells
+brain <- query(roadmap, "Brain")
+gr.brain <- subset(brain, title == brain$title[[11]])[[1]]
+
+# get genes with H3K4me3 in Liver cells
+liver <- query(roadmap, "Liver")
+gr.liver <- subset(liver, title == liver$title[[2]])[[1]]
+```
+
+Above, we set up separate `GRanges` objects holding data from queries on brain
+and liver tissue from the _roadmap epigenomics project_.
+
+```{r}
+# get promoters of genes from RefSeq (conservative) annotation
+qhs <- query(ah, "RefSeq")
+refseq <- qhs[qhs$genome == "hg19" & qhs$title == "RefSeq Genes"]
+refseq <- refseq[[1]]
+promoters <- promoters(refseq)
+prom.reds <- reduce(promoters, ignore.strand = TRUE)
+```
+
+Now, we extract annotation information on promoters from the `RefSeq`
+collection, a conservative set of genes curated for reference.
+
+```{r}
+# for peaks found in brain cell lines
+ov.brain <- findOverlaps(promoters, gr.brain)
+peaks.brain <- reduce(gr.brain)
+int.brain <- intersect(prom.reds, peaks.brain)
+```
+
+For permutation testing, we will need a list of `RefSeq` promoters that are
+associated with H3K4me3 `narrowPeak` data from brain cells.
+
+```{r}
+# for peaks found in liver cell lines
+ov.liver <- findOverlaps(promoters, gr.liver)
+peaks.liver <- reduce(gr.liver)
+int.liver <- intersect(prom.reds, peaks.liver)
+```
+
+For comparison with the above, we will also need a list of `RefSeq` promoters
+that are associated with H3K4me3 `narrowPeak` data from liver cells.
+
+```{r, include=FALSE}
+# original proportion of DE genes in brain, in liver...with H3K4me3
+no_geneSig_brain <- round(0.87*nrow(genes.sig))
+no_geneSig_liver <- round(0.52*nrow(genes.sig))
+```
+
+```{r, eval=FALSE}
+# permute labels in full gene list, re-compute proportions
+n_perm = 10000
+props.brain <- vector("list", n_perm)
+props.liver <- vector("list", n_perm)
+for (i in 1:n_perm) {
+  genes_fdr_perm_ind <- sample(nrow(tt_out_ranked), nrow(genes.sig))
+  genes_fdr_perm <- tt_out_ranked[genes_fdr_perm_ind, ]
+  prop.brain[[i]] <- sum(genes_fdr_perm$geneID %in% int.brain) / nrow(genes.sig)
+  prop.liver[[i]] <- sum(genes_fdr_perm$geneID %in% int.liver) / nrow(genes.sig)
+}
+```
+
+Here, in order to perform permutation testing, we randomly select sets of genes
+(each set being the size of the actual set of differentially expressed genes at
+the 25% FDR level -- that is, 71 genes) that we treat as being differentially
+expressed. We then compute the proportion of these genes that are associated
+with (fall near) the set of H3K4me3 promoter regions in brain cells and in liver
+cells independently. We store these proportions in lists structures so that we
+can examine them against the proportions computed from the "true" list of
+differentially expressed genes.
+
+```{r, echo=FALSE}
+# original proportion of DE genes in brain, in liver
+n_perm = 10000
+prop.brain <- runif(n_perm)
+prop.liver <- runif(n_perm)
+```
+
+```{r}
+# assess exact p-values of proportions
+n_perm = 10000
+prop.brain.sig <- no_geneSig_brain / nrow(genes.sig)
+prop.liver.sig <- no_geneSig_liver / nrow(genes.sig)
+pval_perm_brain <- sum(prop.brain > prop.brain.sig) / n_perm
+pval_perm_liver <- sum(prop.liver > prop.liver.sig) / n_perm
+print(paste("Exact p-value from permutation for H3K4me3 brain promoters:",
+            pval_perm_brain))
+print(paste("Exact p-value from permutation for H3K4me3 liver promoters:",
+            pval_perm_liver))
+```
+
+Although this permutation approach to computing exact p-values for the
+association of the differentially expressed genes with H3K4me3 promoters in
+human liver and brain cells yields different p-values as shown above, we are
+unable to conclude that there is a statistically significant difference. That
+is, although there are distributional differences between the proportion of
+differentially expressed genes associated with the promoter modification of
+interest, the use of the exact p-value does not allow for an inferential
+conclusion to be drawn as to the magnitude of this difference.
+
+```{r}
+suppressMessages(qplot(prop.brain, geom = "histogram",
+                       xlab = "proportion DE genes in H3K4me3 brain promoter",
+                       ylab = "Frequency",
+                       main = "Permutation Histogram of Brain Promoters",
+                       fill = I("blue"), 
+                       col = I("white")
+                       ) + geom_vline(xintercept = prop.brain.sig))
+```
+
+The histogram above provides the permutation distribution of the proportions of
+differentially expressed genes falling near/in H3K4me3-associated promoter
+regions in brain cells from the roadmap epigenomics project. As expected of a
+permutation distribution, it is roughly uniform, though we note that the value
+of the proportion of differentially expressed genes from the "true" list (as
+analyzed by the methods described earlier in this report) fall fairly high in
+this distribution (marked by the black line) -- that is, a relatively few number
+of proportions from the permuted gene list display more extreme values. This
+leads to the conclusion that there may be an associated between the
+differentially expressed genes and H3K4me3 promoter sequences in brain cells,
+though the exact permutation test may not have enough power to adequately
+capture such a nuanced association.
+
+```{r}
+suppressMessages(qplot(prop.liver, geom = "histogram",
+                       xlab = "proportion DE genes in H3K4me3 liver promoter",
+                       ylab = "Frequency",
+                       main = "Permutation Histogram of Liver Promoters",
+                       fill = I("blue"), 
+                       col = I("white")
+                       ) + geom_vline(xintercept = prop.liver.sig))
+```
+
+The histogram above provides the permutation distribution of the proportions of
+differentially expressed genes falling near/in H3K4me3-associated promoter
+regions in liver cells from the roadmap epigenomics project. As expected of a
+permutation distribution, it is roughly uniform, though we note that the value
+of the proportion of differentially expressed genes from the "true" list (as
+analyzed by the methods described earlier in this report) fall towards the
+middle of this distribution (marked by the black line) -- that is, many of the
+proportions from the permuted gene lists display more extreme values. This
+leads to the (fairly conservative) conclusion that there is likely not an
+association between differentially expressed genes and H3K4me3 promoter
+sequences in liver cells.
