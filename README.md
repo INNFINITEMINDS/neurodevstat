@@ -17,7 +17,22 @@ al._ paper cited below.
 
 ## Description
 
-This project constitutes...
+This project constitutes a full-scale bioinformatical and statistical
+re-analysis of data first reported on in the 2014 paper "Developmental
+regulation of human cortex transcription and its clinical relevance at base
+resolution" by A.E. Jaffe _et al._ While this re-analysis was designed to
+reproduce as best as possible results reported in the original paper, several
+aspects of the workflow differ from those in the original analysis.
+Specifically, this re-analysis takes advantage of the novel procedure of read
+pseudo-alignment (available in the [Kallisto software
+package](https://pachterlab.github.io/kallisto/about)) to quantify RNA-Seq
+transcripts, alongside the
+["voom"](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)
+method for linear modeling (available in the popular [R package
+LIMMA](http://bioconductor.org/packages/release/bioc/html/limma.html) to perform
+statistical analysis after summarizing data at the gene level. Summaries of the
+results of this analysis are available in a set of documents available in the
+`reports` subdirectory.
 
 ---
 
@@ -60,7 +75,7 @@ This project constitutes...
 
 ---
 
-## Notes
+## Note
 
 This work was produced as part of  my participation in the [Genomic Data
 Science Capstone](https://www.coursera.org/learn/genomic-data-science-project),

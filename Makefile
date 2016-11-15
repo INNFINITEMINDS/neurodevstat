@@ -1,4 +1,5 @@
-.PHONY : analysis
+.PHONY : all
+all : pseudoalign analysis
 
 dataSRA :
 	python preprocess/01_dumpData.py
@@ -14,5 +15,3 @@ analysis :
 	R CMD BATCH src/01_eda.R
 	R CMD BATCH src/02_modLimma.R
 	R CMD BATCH src/03_visLimma.R
-
-all : pseudoalign analysis
