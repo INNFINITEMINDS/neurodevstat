@@ -1,9 +1,11 @@
 # Curated (re)analysis of nervous system RNA-seq data
 
-[![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
+[![MIT
+license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
 > Materials from a fully reproducible, curated (re)analysis of public data from
-> an RNA-seq study examining developmental changes of the human cortex.
+> an RNA-seq investigation examining developmental genetic changes in the human
+> cortex.
 
 ---
 
@@ -23,20 +25,37 @@ regulation of human cortex transcription and its clinical relevance at base
 resolution" by A.E. Jaffe _et al._ While this re-analysis was designed to
 reproduce as best as possible results reported in the original paper, several
 aspects of the workflow differ from those in the original analysis.
-Specifically, this re-analysis takes advantage of the novel procedure of read
-pseudo-alignment (available in the [Kallisto software
+Specifically, on the bioinformatical side, this re-analysis takes advantage of
+the novel procedure of pseudo-alignment (available in the [Kallisto software
 package](https://pachterlab.github.io/kallisto/about)) to quantify RNA-Seq
-transcripts, alongside the
+transcripts, while, on the statistical side, the
 ["voom"](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)
-method for linear modeling (available in the popular [R package
-LIMMA](http://bioconductor.org/packages/release/bioc/html/limma.html) to perform
-statistical analysis after summarizing data at the gene level. Summaries of the
-results of this analysis are available in a set of documents available in the
-`reports` subdirectory.
+transformation and linear modeling framework (available in the popular [R
+package LIMMA](http://bioconductor.org/packages/release/bioc/html/limma.html))
+is used performing statistical analysis after summarizing data at the gene
+level. Summaries of the results of this re-analysis effort are available in a
+set of documents housed in the `reports` subdirectory.
 
 ---
 
-## References
+## Software Requirements
+
+* [`sra-tools`](https://github.com/ncbi/sra-tools) - utilities for downloading
+    data in SRA format and converting to FASTQ format.
+
+* `Python` - [Python v3.5+](https://www.python.org/downloads/) is used to build
+    wrapper scripts for invoking several command line tools.
+
+* [`kallisto`](https://pachterlab.github.io/kallisto/) - probabilistic
+    pseudo-alignment tool used for quantification of paired-end RNA-seq reads.
+
+* `R` - [R v3.3+](https://www.r-project.org), alongside several packages from
+    the [Bioconductor project](http://www.bioconductor.org), is used for
+    statistical analyses.
+
+---
+
+## Principal References
 
 1. [A.E. Jaffe _et al_. "Developmental regulation of human cortex transcription
     and its clinical relevance at base resolution." _Nature Neuroscience_,
@@ -55,23 +74,6 @@ results of this analysis are available in a set of documents available in the
     differential expression in microarray experiments." _Statistical
     Applications in Genetics and Molecular Biology_, 3(1),
     2004.](http://www.statsci.org/smyth/pubs/ebayes.pdf)
-
----
-
-## Requirements
-
-* [`sra-tools`](https://github.com/ncbi/sra-tools) - utilities for downloading
-    data in SRA format and converting to FASTQ format.
-
-* `Python` - [Python v3.5+](https://www.python.org/downloads/) is used to build
-    wrapper scripts for invoking several command line tools.
-
-* [`kallisto`](https://pachterlab.github.io/kallisto/) - probabilistic
-    pseudo-alignment tool used for quantification of paired-end RNA-seq reads.
-
-* `R` - [R v3.3+](https://www.r-project.org), alongside several packages from
-    the [Bioconductor project](http://www.bioconductor.org), is used for
-    statistical analyses.
 
 ---
 
