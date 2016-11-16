@@ -32,7 +32,7 @@ transcripts, while, on the statistical side, the
 ["voom"](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)
 transformation and linear modeling framework (available in the popular [R
 package LIMMA](http://bioconductor.org/packages/release/bioc/html/limma.html))
-is used performing statistical analysis after summarizing data at the gene
+is used to perform statistical analysis after summarizing data at the gene
 level. Summaries of the results of this re-analysis effort are available in a
 set of documents housed in the `reports` subdirectory.
 
